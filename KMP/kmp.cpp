@@ -1,90 +1,154 @@
 #include <iostream>
-#include <string>
+#include <cstring>
+#include <cstdio>
 
 namespace hihocoder{
 namespace kmp{
 class KmpWorker{
 public:
 	KmpWorker() {}
-	KmpWorker(std::string &t, std::string &p) : text(t), pattern(p) {}
+	KmpWorker(char *t, char *p) : text(t), pattern(p) {}
 	bool init() {}
-	bool set_text(std::string &new_text) {
-		text = new_text;
-		return true;
-	}
-	
-	bool set_pattern(std::string &new_pattern) {
-		pattern = new_pattern;
-		return true;
-	}
 
-	bool get_text(std::string *result) {
-		*result = text;
-		return true;
-	}
-
-	bool get_pattern(std::string *result) {
-		*result = pattern;
-		return true;
-	}
-
-	bool count_pattern_in_text(int *result, const std::string pattern, const std::string text) {
-		if (pattern.length() <= 0) {
+	bool count_pattern_in_text(int *result, char* pattern, char* text) {
+	    int next[10004] = {}; 
+		if (strlen(pattern) <= 0) {
 			// do something	
 			return false;
 		}
 		
-		if (text.length() <= 0) {
+		if (strlen(text) <= 0) {
 			// do something	
 			return false;
 		}
 
-		int *next = new int[pattern.length() + 1];
 
 		if (!gen_next(pattern, next)) {
 			// do something	
 		}
 
+
 		// find substring
 		//
 		
 		*result = 0;
-		int text_length = text.length();
-		int pattern_length = pattern.length();
-		for (int i = 0;i <= text_length - pattern_length; ++i) {
-			bool status = true;
-			for (int j = 0; j < pattern_length; ++j) {
-				if (pattern[j] != text[i + j]) {
-					// i = i + next[j] + 1;
-					i = i + j - next[j];
-					status = false;
-					break;
-				}		
-			}
+		int text_length = strlen(text);
+		int pattern_length = strlen(pattern);
+        int q = 0;
+        int p = 0;
+        while (p < text_length) {
+            if (text[p] == pattern[q]) {
+                ++p;
+                ++q;
+                if (q == pattern_length) {
+                    ++(*result); 
+                }
+            } 
+            else {
+                if (q == -1) {
+                    ++p;
+                    ++q;
+                }
+                else{
+                    q = next[q]; 
+                } 
+            }
+        }
+        // for (int p = 0; p < text_length; ++p) {
+        //     if (text[p] == pattern[q]) {
+        //         ++q; 
+        //         if (q == pattern_length - 1) {
+        //             ++(*result);
+        //             q = next[q]; 
+        //             --p;
+        //             continue;
+        //         }
+        //     }
+        //     else {
+        //         if (q == -1) {
+        //             ++p;
+        //             q = 0;
+        //         }
+        //         else {
+        //             q = next[q];
+        //             --p;
+        //         }
+        //     }
 
-			if (status) {
-				++(*result);
-				i = i + pattern_length - next[pattern_length];
-				// i = i + next[pattern_length];
-			}
-			
-		}
+        // }
+        /***********************************************/ 
+        // int i = 0;
+        // int j = 0;
+        // int n = pattern_length;
+        // int len = text_length;
+        // while(i < len) {
+        //     if (j == -1 || text[i] == pattern[j]) {
+        //         ++i;
+        //         ++j;
+        //     }
+        //     else {
+        //         j = next[j];
+        //     }
+        //     if (j == n) {
+        //         ++(*result);
+        //     }
+        // }
+        /***********************************************/ 
 
 		return true;
 	}	
 private:
-	std::string text;
-	std::string pattern;
-	bool gen_next(const std::string &pattern, int *next) {
+	char* text;
+	char* pattern;
+	bool gen_next(char *pattern, int *next) {
 		next[0] = -1;
-		for (int i = 0; i < pattern.length(); ++ i) {
-			if (pattern[next[i]] == pattern[i]) {
-				next[i + 1] = next[i] + 1;
-			} 
-			else{
-				next[i + 1] = 0;	
-			}
-		}
+        // std::cout << "next[0]= " << next[0] << ", next[1] = " << next[1] << std::endl;
+        // std::cout << pattern << std::endl;
+        // for (int p = 0; p < strlen(pattern); ++p) {
+        //     int q = p - 1;
+        //     while (1) { 
+        //         // std::cout << "p = " << p << ", q = " << q << std::endl;
+        //         q = next[q + 1];
+        //         if (pattern[q + 1] == pattern[p]) {
+        //             next[p + 1] = q + 1;
+        //             break;
+        //         }
+        //         if (q == -1) {
+        //             next[p + 1] = 0;
+        //             break;
+        //         }
+
+        //     }
+        //     printf("next[%d] = %d\n", p + 1, next[p + 1]);
+        // }
+
+        int i = 0;
+        int j = -1;
+        while( i < strlen(pattern)) {
+            if (j == -1 || pattern[i] == pattern[j]) {
+                next[i + 1] = j + 1;
+                printf("next[%d] = %d\n", i + 1, next[i + 1]);
+                j = next[i + 1];
+                ++i;
+            }
+            else {
+                j = next[j]; 
+            }
+        }
+        /**************************************/ 
+        // int i = 0;
+        // int j = -1;
+        // next[0] = -1;
+        // int len = strlen(pattern);
+        // while(i < len) {
+        //     if (j == -1 || pattern[i] == pattern[j]) {
+        //         next[++i] = ++j;
+        //     } 
+        //     else {
+        //         j = next[j];
+        //     }
+        // }
+        /**************************************/ 
 
 		return true;
 	}
@@ -95,18 +159,23 @@ private:
 
 
 int main() {
-	std::string text;
-	std::string pattern;
+	// std::string text;
+	// std::string pattern;
+    char text[1000007];
+    char pattern[10050];
 	hihocoder::kmp::KmpWorker kmp_worker;
 	if (!kmp_worker.init()) {
 		// do something	
 	}	
 	int num_test;
-	std::cin >> num_test;
-	while(num_test) {
-		std::cin >> pattern;
-		std::cin >> text;
-		--num_test;
+	// std::cin >> num_test;
+    scanf("%d", &num_test);	
+    while(num_test) {
+		// std::cin >> pattern;
+		// std::cin >> text;
+	    scanf("%s%s", pattern, text);	
+        printf("%s\n%s\n", pattern, text); 
+        --num_test;
 		
 		// if (!kmp_worker.set_text(text)) {
 		// 	//do something	
@@ -121,8 +190,8 @@ int main() {
 		if (!kmp_worker.count_pattern_in_text(&result, pattern , text)) {
 			// do something	
 		}
-
-		std::cout << result << std::endl;
+        printf("%d\n", result);
+		// std::cout << result << std::endl;
 	}
 
 	return 0;
